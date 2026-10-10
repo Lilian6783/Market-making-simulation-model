@@ -1,0 +1,46 @@
+import httpx
+import time
+
+def main():
+  print("Market Making algo started running...")
+  #spread selection
+  custom_spread = 0.05
+
+  #volume selection
+  custom_volume = 1000
+  
+  while True:
+    current_tick = client.get("/case").json().get("tick")
+    if 1 < current_tick < 300:
+      n_orders = len(client.get("/orders", params={'status': 'OPEN'}).json())
+      if n_orders == 0:
+        #ALGO Last price query
+        param_A = {'ticker': 'ALGO'}
+        resp = client.get('/securities', params=param_A).json()
+        algo_last = resp[0].get('last')
+
+        price_up = algo_last - (custom_spread*0,5)
+        price_down = algo_last + (custome_spread*0.5)
+
+        params_1 = {'ticker': 'ALGO', 'type': 'LIMIT', 'quantity': custom_volume, 'action': 'BUY', 'price': price_up}
+        params_2 = {'ticker': 'ALGO', 'type': 'LIMIT', 'quantity': custom_volume, 'action': 'SELL','price': price_down}
+
+        client.post('/orders', params=params_1)
+        client.post('/orders', params=params_2)
+
+        #Verify if there are 2 orders running
+        elif n_orders != 2:
+          client.post('/command/cancel', param={'all': 1}
+      
+      time.sleep(0.05)
+
+if __name__ == "__main__":
+API_KEY = "API KEY"
+API_Port = "API PORT"
+url = f"http://localhost:{API_PORT}/v1"
+params = {'key': API_KEY}
+
+with httpx.Client(base_url=url, params=params) as client:
+  main()
+
+  
